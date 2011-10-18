@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface EnViewController : UIViewController
+@interface EnViewController : UIViewController <UITextFieldDelegate>
 {
+    UITextField *serverField;
 }
+
+@property (nonatomic, retain) IBOutlet UITextField *serverField;
 
 @end
 

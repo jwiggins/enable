@@ -10,6 +10,8 @@
 
 @implementation EnViewController
 
+@synthesize serverField;
+
 
 /*
 // The designated initializer. Override to perform setup that is required before the view is loaded.
@@ -22,21 +24,15 @@
 }
 */
 
-/*
-// Implement loadView to create a view hierarchy programmatically, without using a nib.
-- (void)loadView
-{
-}
-*/
 
-
-/*
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad
 {
+    serverField.delegate = self;
+    
     [super viewDidLoad];
 }
-*/
+
 
 
 // Override to allow orientations other than the default portrait orientation.
@@ -55,10 +51,20 @@
 
 - (void)viewDidUnload
 {
-	// Release any retained subviews of the main view.
-	// e.g. self.myOutlet = nil;
+	self.serverField = nil;
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    // Dismiss the keyboard
+    [serverField resignFirstResponder];
+    return YES;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    // Do something with the contents of serverField
+}
 
 - (void)dealloc
 {

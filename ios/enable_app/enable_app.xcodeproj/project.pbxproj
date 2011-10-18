@@ -21,7 +21,7 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* EnAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* EnAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EnAppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* enable_app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = enable_app.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* enable.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = enable.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		2899E5210DE3E06400AC0155 /* EnViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EnViewController.xib; sourceTree = "<group>"; };
@@ -61,7 +61,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* enable_app.app */,
+				1D6058910D05DD3D006BFB54 /* enable.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,7 +124,7 @@
 			);
 			name = enable;
 			productName = enable_app;
-			productReference = 1D6058910D05DD3D006BFB54 /* enable_app.app */;
+			productReference = 1D6058910D05DD3D006BFB54 /* enable.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -137,7 +137,11 @@
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "enable_app" */;
 			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -183,7 +187,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = enable_app_Prefix.pch;
 				INFOPLIST_FILE = "enable_app-Info.plist";
-				PRODUCT_NAME = enable_app;
+				PRODUCT_NAME = enable;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
@@ -195,7 +200,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = enable_app_Prefix.pch;
 				INFOPLIST_FILE = "enable_app-Info.plist";
-				PRODUCT_NAME = enable_app;
+				PRODUCT_NAME = enable;
+				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
