@@ -17,7 +17,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {    
-    // Override point for customization after app launch    
+    // Override point for customization after app launch
+    [application setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
     [window addSubview:viewController.view];
     [window makeKeyAndVisible];
 
