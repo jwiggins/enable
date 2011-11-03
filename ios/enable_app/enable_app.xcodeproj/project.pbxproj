@@ -14,6 +14,7 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		28D7ACF80DDB3853001CB0EB /* EnViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* EnViewController.m */; };
 		52B1DDFA146235FF00FF1F12 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52B1DDF9146235FF00FF1F12 /* MainStoryboard.storyboard */; };
+		52B1DE4414624B2F00FF1F12 /* EnWindowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 52B1DE4314624B2F00FF1F12 /* EnWindowViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,8 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* enable_app_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = enable_app_Prefix.pch; sourceTree = "<group>"; };
 		52B1DDF9146235FF00FF1F12 /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
+		52B1DE4214624B2F00FF1F12 /* EnWindowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnWindowViewController.h; sourceTree = "<group>"; };
+		52B1DE4314624B2F00FF1F12 /* EnWindowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EnWindowViewController.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* enable_app-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "enable_app-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -52,6 +55,8 @@
 				1D3623250D0F684500981E51 /* EnAppDelegate.m */,
 				28D7ACF60DDB3853001CB0EB /* EnViewController.h */,
 				28D7ACF70DDB3853001CB0EB /* EnViewController.m */,
+				52B1DE4214624B2F00FF1F12 /* EnWindowViewController.h */,
+				52B1DE4314624B2F00FF1F12 /* EnWindowViewController.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -168,6 +173,7 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* EnAppDelegate.m in Sources */,
 				28D7ACF80DDB3853001CB0EB /* EnViewController.m in Sources */,
+				52B1DE4414624B2F00FF1F12 /* EnWindowViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

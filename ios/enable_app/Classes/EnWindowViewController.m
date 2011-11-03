@@ -1,16 +1,16 @@
 //
-//  EnViewController.m
+//  EnWindowViewController.m
 //  enable_app
 //
-//  Created by John Wiggins on 10/12/11.
-//  Copyright Enthought 2011. All rights reserved.
+//  Created by John Wiggins on 11/2/11.
+//  Copyright (c) 2011 Enthought. All rights reserved.
 //
 
-#import "EnViewController.h"
+#import "EnWindowViewController.h"
 
-@implementation EnViewController
+@implementation EnWindowViewController
 
-@synthesize serverField;
+@synthesize backButton;
 
 - (void)didReceiveMemoryWarning
 {
@@ -31,7 +31,6 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-    self.serverField = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -60,22 +59,9 @@
     return YES;
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
-{
-    // Dismiss the keyboard
-    [serverField resignFirstResponder];
-    return YES;
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField
-{
-    // Do something with the contents of serverField
-    [self performSegueWithIdentifier:@"SwitchToEnableWindow" sender:serverField];
-}
-
-- (void) dealloc
-{
-    serverField.delegate = nil;
-}
-
 @end
+
+
+
+
+
