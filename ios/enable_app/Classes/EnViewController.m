@@ -66,9 +66,10 @@
     // Do something with the contents of serverField
 }
 
-- (void)dealloc
+- (void) dealloc
 {
-    [super dealloc];
+    serverField.delegate = nil;
 }
+
 
 @end

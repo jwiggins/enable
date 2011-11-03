@@ -13,7 +13,7 @@
     UITextField *serverField;
 }
 
-@property (nonatomic, retain) IBOutlet UITextField *serverField;
+@property (nonatomic, strong) IBOutlet UITextField *serverField;
 
 @end
 
