@@ -8,16 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@class EnViewController;
-
-@interface EnAppDelegate : NSObject <UIApplicationDelegate>
-{
-    UIWindow *window;
-    EnViewController *viewController;
-}
+@interface EnAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (nonatomic, strong) IBOutlet UIWindow *window;
-@property (nonatomic, strong) IBOutlet EnViewController *viewController;
 
 @end
 
