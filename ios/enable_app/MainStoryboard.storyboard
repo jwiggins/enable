@@ -50,32 +50,55 @@
                         <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="fhH-nw-m5p">
-                                <rect key="frame" x="20" y="20" width="72" height="37"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="Back">
-                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <state key="highlighted">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <segue destination="0Rv-xd-qPs" kind="modal" modalTransitionStyle="flipHorizontal" id="MQw-aC-qXg"/>
-                                </connections>
-                            </button>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackTranslucent" id="IDD-GT-8Ix">
+                                <rect key="frame" x="0.0" y="980" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <items>
+                                    <barButtonItem systemItem="done" id="olC-s0-Yx9">
+                                        <connections>
+                                            <segue destination="0Rv-xd-qPs" kind="modal" modalTransitionStyle="flipHorizontal" id="gSm-VM-zof"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="20d-dn-S38" appends="YES" id="EED-uc-dpF"/>
+                            <outletCollection property="gestureRecognizers" destination="ea7-2Y-QYM" appends="YES" id="HMx-Wb-wos"/>
+                            <outletCollection property="gestureRecognizers" destination="tBD-uj-IOg" appends="YES" id="SGi-Wf-fAD"/>
+                        </connections>
                     </view>
                     <navigationItem key="navigationItem" id="NT0-0H-BlC"/>
                     <nil key="simulatedStatusBarMetrics"/>
                     <connections>
-                        <outlet property="backButton" destination="fhH-nw-m5p" id="tS8-O6-uiv"/>
+                        <outlet property="panRecognizer" destination="tBD-uj-IOg" id="Pa7-UI-LT4"/>
+                        <outlet property="pinchRecognizer" destination="ea7-2Y-QYM" id="Zuq-I4-xtN"/>
+                        <outlet property="tapRecognizer" destination="20d-dn-S38" id="E6E-h2-Ron"/>
+                        <outlet property="toolbar" destination="IDD-GT-8Ix" id="gE7-UR-Bc0"/>
                     </connections>
                 </viewController>
+                <tapGestureRecognizer id="20d-dn-S38">
+                    <connections>
+                        <action selector="handleTapGesture:" destination="jcO-WZ-e6V" id="rWr-ii-eBt"/>
+                        <outlet property="delegate" destination="jcO-WZ-e6V" id="S4B-pG-NBv"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <pinchGestureRecognizer id="ea7-2Y-QYM">
+                    <connections>
+                        <action selector="handlePinchGesture:" destination="jcO-WZ-e6V" id="v9D-dQ-hZi"/>
+                        <outlet property="delegate" destination="jcO-WZ-e6V" id="odJ-dt-W1U"/>
+                    </connections>
+                </pinchGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="tBD-uj-IOg">
+                    <connections>
+                        <action selector="handlePanGesture:" destination="jcO-WZ-e6V" id="oFB-XC-Nlk"/>
+                        <outlet property="delegate" destination="jcO-WZ-e6V" id="Tt2-Ry-e4R"/>
+                    </connections>
+                </panGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-260" y="-53"/>
+            <point key="canvasLocation" x="-1200" y="1441"/>
         </scene>
     </scenes>
     <classes>
@@ -88,7 +111,13 @@
         <class className="EnWindowViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/EnWindowViewController.h"/>
             <relationships>
-                <relationship kind="outlet" name="backButton" candidateClass="UIButton"/>
+                <relationship kind="action" name="handlePanGesture:" candidateClass="UIGestureRecognizer"/>
+                <relationship kind="action" name="handlePinchGesture:" candidateClass="UIGestureRecognizer"/>
+                <relationship kind="action" name="handleTapGesture:" candidateClass="UIGestureRecognizer"/>
+                <relationship kind="outlet" name="panRecognizer" candidateClass="UIGestureRecognizer"/>
+                <relationship kind="outlet" name="pinchRecognizer" candidateClass="UIGestureRecognizer"/>
+                <relationship kind="outlet" name="tapRecognizer" candidateClass="UIGestureRecognizer"/>
+                <relationship kind="outlet" name="toolbar" candidateClass="UIToolbar"/>
             </relationships>
         </class>
     </classes>

@@ -8,8 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface EnWindowViewController : UIViewController
+@interface EnWindowViewController : UIViewController <UIGestureRecognizerDelegate>
 
-@property (nonatomic, strong) IBOutlet UIButton *backButton;
+@property (nonatomic, strong) IBOutlet UIGestureRecognizer *panRecognizer;
+@property (nonatomic, strong) IBOutlet UIGestureRecognizer *pinchRecognizer;
+@property (nonatomic, strong) IBOutlet UIGestureRecognizer *tapRecognizer;
+@property (nonatomic, strong) IBOutlet UIToolbar *toolbar;
+
+- (IBAction)handlePanGesture:(UIGestureRecognizer *)gestureRecognizer;
+- (IBAction)handlePinchGesture:(UIGestureRecognizer *)gestureRecognizer;
+- (IBAction)handleTapGesture:(UIGestureRecognizer *)gestureRecognizer;
 
 @end
