@@ -16,6 +16,7 @@
 		523E701B1465D528005E199C /* enthought.png in Resources */ = {isa = PBXBuildFile; fileRef = 523E701A1465D528005E199C /* enthought.png */; };
 		52B1DDFA146235FF00FF1F12 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52B1DDF9146235FF00FF1F12 /* MainStoryboard.storyboard */; };
 		52B1DE4414624B2F00FF1F12 /* EnWindowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 52B1DE4314624B2F00FF1F12 /* EnWindowViewController.m */; };
+		52F09E5D146B896000A60793 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52F09E5C146B896000A60793 /* QuartzCore.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,8 @@
 		52B1DDF9146235FF00FF1F12 /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
 		52B1DE4214624B2F00FF1F12 /* EnWindowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnWindowViewController.h; sourceTree = "<group>"; };
 		52B1DE4314624B2F00FF1F12 /* EnWindowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EnWindowViewController.m; sourceTree = "<group>"; };
+		52F09E5C146B896000A60793 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		52FE02431465DBAE00709A0E /* EnGraphicsContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnGraphicsContext.h; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* enable_app-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "enable_app-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -44,6 +47,7 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
+				52F09E5D146B896000A60793 /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +57,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				52FE02431465DBAE00709A0E /* EnGraphicsContext.h */,
 				1D3623240D0F684500981E51 /* EnAppDelegate.h */,
 				1D3623250D0F684500981E51 /* EnAppDelegate.m */,
 				28D7ACF60DDB3853001CB0EB /* EnViewController.h */,
@@ -108,6 +113,7 @@
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
+				52F09E5C146B896000A60793 /* QuartzCore.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
