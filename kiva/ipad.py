@@ -91,7 +91,10 @@ class CompiledPath(object):
 
 class GraphicsContext(object):
     def __init__(self, size, *args, **kwargs):
-        pass
+        print "GraphicsContext.__init__()"
+        self._width, self._height = size
+        self.text_pos = (0.0, 0.0)
+        self.text_transform = (1.0,0.0,0.0,1.0,0.0,0.0)
 
     #----------------------------------------------------------------
     # Size info
@@ -100,11 +103,13 @@ class GraphicsContext(object):
     def height(self):
         """ Returns the height of the context.
         """
+        print "GraphicsContext.height()"
         return self._height
 
     def width(self):
         """ Returns the width of the context.
         """
+        print "GraphicsContext.width()"
         return self._width
 
     #----------------------------------------------------------------
@@ -117,7 +122,7 @@ class GraphicsContext(object):
             sx:float -- The new scale factor for the x axis
             sy:float -- The new scale factor for the y axis
         """
-        pass
+        print "GraphicsContext.scale_ctm()"
 
     def translate_ctm(self, tx, ty):
         """ Translate the coordinate system by the given value by (tx,ty)
@@ -125,7 +130,7 @@ class GraphicsContext(object):
             tx:float --  The distance to move in the x direction
             ty:float --   The distance to move in the y direction
         """
-        pass
+        print "GraphicsContext.translate_ctm()"
 
     def rotate_ctm(self, angle):
         """ Rotates the coordinate space for drawing by the given angle.
@@ -133,7 +138,7 @@ class GraphicsContext(object):
             angle:float -- the angle, in radians, to rotate the coordinate
                            system
         """
-        pass
+        print "GraphicsContext.rotate_ctm()"
 
     def concat_ctm(self, transform):
         """ Concatenate the transform to current coordinate transform matrix.
@@ -141,12 +146,12 @@ class GraphicsContext(object):
             transform:affine_matrix -- the transform matrix to concatenate with
                                        the current coordinate matrix.
         """
-        pass
+        print "GraphicsContext.concat_ctm()"
 
     def get_ctm(self):
         """ Return the current coordinate transform matrix.
         """
-        t = self.gc.transform()
+        print "GraphicsContext.get_ctm()"
         return (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 
     #----------------------------------------------------------------
@@ -158,12 +163,12 @@ class GraphicsContext(object):
 
             This should always be paired with a restore_state
         """
-        pass
+        print "GraphicsContext.save_state()"
 
     def restore_state(self):
         """ Restore the previous graphics state.
         """
-        pass
+        print "GraphicsContext.restore_state()"
 
     #----------------------------------------------------------------
     # context manager interface
@@ -182,14 +187,14 @@ class GraphicsContext(object):
     def set_antialias(self,value):
         """ Set/Unset antialiasing
         """
-        pass
+        print "GraphicsContext.set_antialias()"
 
     def set_line_width(self,width):
         """ Set the line width for drawing
 
             width:float -- The new width for lines in user space units.
         """
-        pass
+        print "GraphicsContext.set_line_width()"
 
     def set_line_join(self,style):
         """ Set style for joining lines in a drawing.
@@ -197,7 +202,7 @@ class GraphicsContext(object):
             style:join_style -- The line joining style.  The available
                                 styles are JOIN_ROUND, JOIN_BEVEL, JOIN_MITER.
         """
-        pass
+        print "GraphicsContext.set_line_join()"
 
     def set_miter_limit(self,limit):
         """ Specifies limits on line lengths for mitering line joins.
@@ -210,7 +215,7 @@ class GraphicsContext(object):
 
             limit:float -- limit for mitering joins.
         """
-        pass
+        print "GraphicsContext.set_miter_limit()"
 
     def set_line_cap(self,style):
         """ Specify the style of endings to put on line ends.
@@ -218,7 +223,7 @@ class GraphicsContext(object):
             style:cap_style -- the line cap style to use. Available styles
                                are CAP_ROUND,CAP_BUTT,CAP_SQUARE
         """
-        pass
+        print "GraphicsContext.set_line_cap()"
 
     def set_line_dash(self,lengths,phase=0):
         """
@@ -229,7 +234,7 @@ class GraphicsContext(object):
             phase:float -- Specifies how many units into dash pattern
                            to start.  phase defaults to 0.
         """
-        pass
+        print "GraphicsContext.set_line_dash()"
 
     def set_flatness(self,flatness):
         """ Not implemented
@@ -237,6 +242,7 @@ class GraphicsContext(object):
             It is device dependent and therefore not recommended by
             the PDF documentation.
         """
+        print "GraphicsContext.set_flatness()"
         raise NotImplementedError
 
     #----------------------------------------------------------------
@@ -246,12 +252,12 @@ class GraphicsContext(object):
     def flush(self):
         """ Send all drawing data to the destination device.
         """
-        pass
+        print "GraphicsContext.flush()"
 
     def synchronize(self):
         """ Prepares drawing data to be updated on a destination device.
         """
-        pass
+        print "GraphicsContext.synchronize()"
 
     #----------------------------------------------------------------
     # Page Definitions
@@ -260,12 +266,12 @@ class GraphicsContext(object):
     def begin_page(self):
         """ Create a new page within the graphics context.
         """
-        pass
+        print "GraphicsContext.begin_page()"
 
     def end_page(self):
         """ End drawing in the current page of the graphics context.
         """
-        pass
+        print "GraphicsContext.end_page()"
 
     #----------------------------------------------------------------
     # Building paths
@@ -274,11 +280,13 @@ class GraphicsContext(object):
     def begin_path(self):
         """ Clear the current drawing path and begin a new one.
         """
+        print "GraphicsContext.begin_path()"
         self.path = CompiledPath()
 
     def move_to(self,x,y):
         """ Start a new drawing subpath at place the current point at (x,y).
         """
+        print "GraphicsContext.move_to()"
         self.path.move_to(x,y)
 
     def line_to(self,x,y):
@@ -286,6 +294,7 @@ class GraphicsContext(object):
 
             The current point is moved to (x,y).
         """
+        print "GraphicsContext.line_to()"
         self.path.line_to(x,y)
 
     def lines(self,points):
@@ -295,11 +304,13 @@ class GraphicsContext(object):
 
             Points is an Nx2 array of x,y pairs.
         """
+        print "GraphicsContext.lines()"
         self.path.lines(points)
 
     def line_set(self, starts, ends):
         """ Draw multiple disjoint line segments.
         """
+        print "GraphicsContext.line_set()"
         for start, end in izip(starts, ends):
             self.path.path.moveTo(start[0], start[1])
             self.path.path.lineTo(end[0], end[1])
@@ -307,46 +318,54 @@ class GraphicsContext(object):
     def rect(self,x,y,sx,sy):
         """ Add a rectangle as a new subpath.
         """
+        print "GraphicsContext.rect()"
         self.path.rect(x,y,sx,sy)
 
     def rects(self,rects):
         """ Add multiple rectangles as separate subpaths to the path.
         """
+        print "GraphicsContext.rects()"
         self.path.rects(rects)
 
     def draw_rect(self, rect, mode=constants.FILL_STROKE):
         """ Draw a rect.
         """
-        pass
+        print "GraphicsContext.draw_rect()"
 
     def add_path(self, path):
         """ Add a subpath to the current path.
         """
+        print "GraphicsContext.add_path()"
         self.path.add_path(path)
 
     def close_path(self):
         """ Close the path of the current subpath.
         """
+        print "GraphicsContext.close_path()"
         self.path.close_path()
 
     def curve_to(self, cp1x, cp1y, cp2x, cp2y, x, y):
         """
         """
+        print "GraphicsContext.curve_to()"
         self.path.curve_to(cp1x, cp1y, cp2x, cp2y, x, y)
 
     def quad_curve_to(self, cpx, cpy, x, y):
         """
         """
+        print "GraphicsContext.quad_curve_to()"
         self.path.quad_curve_to(cpx, cpy, x, y)
 
     def arc(self, x, y, radius, start_angle, end_angle, clockwise=False):
         """
         """
+        print "GraphicsContext.arc()"
         self.path.arc(x, y, radius, start_angle, end_angle, clockwise)
 
     def arc_to(self, x1, y1, x2, y2, radius):
         """
         """
+        print "GraphicsContext.arc_to()"
         self.path.arc_to(x1, y1, x2, y2, radius)
 
     #----------------------------------------------------------------
@@ -356,16 +375,19 @@ class GraphicsContext(object):
     def is_path_empty(self):
         """ Test to see if the current drawing path is empty
         """
+        print "GraphicsContext.is_path_empty()"
         return self.path.is_empty()
 
     def get_path_current_point(self):
         """ Return the current point from the graphics context.
         """
+        print "GraphicsContext.get_path_current_point()"
         return self.path.get_current_point()
 
     def get_path_bounding_box(self):
         """ Return the bounding box for the current path object.
         """
+        print "GraphicsContext.get_path_bounding_box()"
         return self.path.get_bounding_box()
 
     #----------------------------------------------------------------
@@ -375,24 +397,24 @@ class GraphicsContext(object):
     def clip(self):
         """
         """
-        pass
+        print "GraphicsContext.clip()"
 
     def even_odd_clip(self):
         """
         """
-        pass
+        print "GraphicsContext.even_odd_clip()"
 
     def clip_to_rect(self, x, y, w, h):
         """ Clip context to the given rectangular region.
 
             Region should be a 4-tuple or a sequence.
         """
-        pass
+        print "GraphicsContext.clip_to_rect()"
 
     def clip_to_rects(self, rects):
         """
         """
-        pass
+        print "GraphicsContext.clip_to_rects()"
 
     #----------------------------------------------------------------
     # Color space manipulation
@@ -405,19 +427,19 @@ class GraphicsContext(object):
     def set_fill_color_space(self):
         """
         """
-        msg = "set_fill_color_space not implemented on Qt yet."
+        msg = "set_fill_color_space not implemented yet."
         raise NotImplementedError, msg
 
     def set_stroke_color_space(self):
         """
         """
-        msg = "set_stroke_color_space not implemented on Qt yet."
+        msg = "set_stroke_color_space not implemented yet."
         raise NotImplementedError, msg
 
     def set_rendering_intent(self):
         """
         """
-        msg = "set_rendering_intent not implemented on Qt yet."
+        msg = "set_rendering_intent not implemented yet."
         raise NotImplementedError, msg
 
     #----------------------------------------------------------------
@@ -427,17 +449,17 @@ class GraphicsContext(object):
     def set_fill_color(self, color):
         """
         """
-        pass
+        print "GraphicsContext.set_fill_color()"
 
     def set_stroke_color(self, color):
         """
         """
-        pass
+        print "GraphicsContext.set_stroke_color()"
 
     def set_alpha(self, alpha):
         """
         """
-        pass
+        print "GraphicsContext.set_alpha()"
 
     #----------------------------------------------------------------
     # Gradients
@@ -447,13 +469,13 @@ class GraphicsContext(object):
                         units='userSpaceOnUse'):
         """ Sets a linear gradient as the current brush.
         """
-        pass
+        print "GraphicsContext.linear_gradient()"
 
     def radial_gradient(self, cx, cy, r, fx, fy, stops, spread_method,
                         units='userSpaceOnUse'):
         """ Sets a radial gradient as the current brush.
         """
-        pass
+        print "GraphicsContext.radial_gradient()"
 
     #----------------------------------------------------------------
     # Drawing Images
@@ -465,7 +487,7 @@ class GraphicsContext(object):
 
         rect - a tuple (x,y,w,h)
         """
-        pass
+        print "GraphicsContext.draw_image()"
 
     #----------------------------------------------------------------
     # Drawing Text
@@ -474,46 +496,50 @@ class GraphicsContext(object):
     def select_font(self, name, size, textEncoding):
         """ Set the font for the current graphics context.
         """
-        pass
+        print "GraphicsContext.select_font()"
 
     def set_font(self, font):
         """ Set the font for the current graphics context.
         """
-        pass
+        print "GraphicsContext.set_font()"
 
     def set_font_size(self, size):
         """
         """
-        pass
+        print "GraphicsContext.set_font_size()"
 
     def set_character_spacing(self, spacing):
         """
         """
-        pass
+        print "GraphicsContext.set_character_spacing()"
 
     def set_text_drawing_mode(self):
         """
         """
-        pass
+        print "GraphicsContext.set_text_drawing_mode()"
 
     def set_text_position(self,x,y):
         """
         """
+        print "GraphicsContext.set_text_position()"
         self.text_pos = (x,y)
 
     def get_text_position(self):
         """
         """
+        print "GraphicsContext.get_text_position()"
         return self.text_pos
 
     def set_text_matrix(self,ttm):
         """
         """
+        print "GraphicsContext.set_text_matrix()"
         self.text_transform = ttm
 
     def get_text_matrix(self):
         """
         """
+        print "GraphicsContext.get_text_matrix()"
         return self.text_transform
 
     def show_text(self, text, point=None):
@@ -522,12 +548,12 @@ class GraphicsContext(object):
             This is also used for showing text at a particular point
             specified by x and y.
         """
-        pass
+        print "GraphicsContext.show_text()"
 
     def show_text_at_point(self, text, x, y):
         """ Draw text at some point (x,y).
         """
-        pass
+        print "GraphicsContext.show_text_at_point()"
 
     def show_glyphs(self):
         """
@@ -537,11 +563,13 @@ class GraphicsContext(object):
     def get_text_extent(self, text):
         """ Returns the bounding rect of the rendered text
         """
-        return rect.left(), -fm.descent(), rect.right(), fm.height()
+        print "GraphicsContext.get_text_extent()"
+        return 0.0, 0.0, 1.0, 1.0
 
     def get_full_text_extent(self, text):
         """ Backwards compatibility API over .get_text_extent() for Enable
         """
+        print "GraphicsContext.get_full_text_extent()"
         x1, y1, x2, y2 = self.get_text_extent(text)
         return x2, y2, y1, x1
 
@@ -552,32 +580,35 @@ class GraphicsContext(object):
     def stroke_path(self):
         """
         """
+        print "GraphicsContext.stroke_path()"
         self.begin_path()
 
     def fill_path(self):
         """
         """
+        print "GraphicsContext.fill_path()"
         self.begin_path()
 
     def eof_fill_path(self):
         """
         """
+        print "GraphicsContext.eof_fill_path()"
         self.begin_path()
 
     def stroke_rect(self,rect):
         """
         """
-        pass
+        print "GraphicsContext.stroke_rect()"
 
     def stroke_rect_with_width(self,rect,width):
         """
         """
-        pass
+        print "GraphicsContext.stroke_rect_with_width()"
 
     def fill_rect(self,rect):
         """
         """
-        pass
+        print "GraphicsContext.fill_rect()"
 
     def fill_rects(self):
         """
@@ -587,32 +618,34 @@ class GraphicsContext(object):
     def clear_rect(self, rect):
         """
         """
-        pass
+        print "GraphicsContext.clear_rect()"
 
     def clear(self, clear_color=(1.0,1.0,1.0,1.0)):
         """
         """
-        pass
+        print "GraphicsContext.clear()"
 
     def draw_path(self, mode):
         """ Walk through all the drawing subpaths and draw each element.
 
             Each subpath is drawn separately.
         """
+        print "GraphicsContext.draw_path()"
         self.begin_path()
 
     def get_empty_path(self):
         """ Return a path object that can be built up and then reused.
         """
+        print "GraphicsContext.get_empty_path()"
         return CompiledPath()
 
     def draw_path_at_points(self, points, path, mode):
-        pass
+        print "GraphicsContext.draw_path_at_points()"
 
     def save(self, filename, file_format=None):
         """ Save the contents of the context to a file
         """
-        pass
+        print "GraphicsContext.save()"
 
 def font_metrics_provider():
     return GraphicsContext()
