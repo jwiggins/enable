@@ -14,6 +14,7 @@
 __all__ = ["CompiledPath", "Font", "font_metrics_provider", "GraphicsContext"]
 
 import json
+import numpy as np
 from StringIO import StringIO
 from uuid import uuid4 as rand_uid
 
@@ -38,6 +39,34 @@ KIVA_OPCODES = {
     
 }
 
+def _arc_extent(self, x, y, r, startAngle, endAngle, clockwise):
+    """ Calculates the bounding box of an arc given the center (x, y),
+        radius r, and angles startAngle, endAngle. Angles should be in the
+        range [0, 2*pi].
+    """
+    axes = [0., np.pi*.5, np.pi, np.pi*1.5, np.pi*2.]
+    bound_angles = [startAngle, endAngle]
+    start_quad, end_quad = np.searchsorted(axes, (startAngle, endAngle))
+    assert start_quad > 0 and start_quad < len(axes)
+    assert end_quad > 0 and end_quad < len(axes)
+    
+    if start_quad != end_quad:
+        increment = -1 if clockwise else 1
+        quad = start_quad
+        while quad != end_quad:
+            axis_idx = quad-1 if clockwise else quad
+            bound_angles.append(axes[axis_idx])
+            quad += increment
+            if quad <= 0:
+                quad = 4
+            elif quad > 4:
+                quad = 1
+    
+    xs = [x+r*np.cos(t) for t in bound_angles] + [x,]
+    ys = [y+r*np.sin(t) for t in bound_angles] + [y,]
+    return [(min(xs), min(ys)), (max(xs), max(ys))]
+
+
 class CompiledPath(object):
     def __init__(self, path=None):
         self.uid = rand_uid()
@@ -54,18 +83,17 @@ class CompiledPath(object):
         if not self.empty and self.current_point != self.start_point:
             self.line_to(*self.start_point)
 
-    def move_to(self, x, y, transform=None):
+    def move_to(self, x, y):
         self.current_point = (x, y)
         self._expand_extent([(x,y),])
         
         op = dict(op=KIVA_OPCODES['move_to'], pnt=(x,y))
         json.dump(op, self.path)
 
-    def arc(self, x, y, r, startAngle, endAngle, clockwise=False, transform=None):
-        # XXX: compute the correct endpoint of the arc as the new current point
-        self.current_point = (x, y)
-        # XXX: compute the correct extent of the arc
-        self._expand_extent([(x,y), (x+r,y+r)])
+    def arc(self, x, y, r, startAngle, endAngle, clockwise=False):
+        self.current_point = (x+r*cos(endAngle), y+r*sin(endAngle))
+        extent = _arc_extent(x, y, r, startAngle, endAngle, clockwise)
+        self._expand_extent(extent)
         self.empty = False
 
         op = dict(op=KIVA_OPCODES['arc'],
@@ -73,10 +101,13 @@ class CompiledPath(object):
                   clock=clockwise)
         json.dump(op, self.path)
 
-    def arc_to(self, x1, y1, x2, y2, r, transform=None):
+    def arc_to(self, x1, y1, x2, y2, r):
+        # XXX: this calculation assumes that the radius fits inside the points
+        x0, y0 = self.current_point
+        xs = (min(x0,x1,x2), max(x0,x1,x2))
+        ys = (min(y0,y1,y2), max(y0,y1,y2))
+        self._expand_extent([(xs[0],ys[0]), (xs[1],ys[1])])
         self.current_point = (x2, y2)
-        # XXX: compute the correct extent of the arc
-        self._expand_extent([(x1,y1), (x2,y2)])
         self.empty = False
         
         op = dict(op=KIVA_OPCODES['arc_to'],
@@ -84,7 +115,7 @@ class CompiledPath(object):
         json.dump(op, self.path)
 
 
-    def curve_to(self, cx1, cy1, cx2, cy2, x, y, transform=None):
+    def curve_to(self, cx1, cy1, cx2, cy2, x, y):
         self.current_point = (x, y)
         self._expand_extent([(cx1,cy1), (cx2,cy2), (x,y)])
         self.empty = False
@@ -93,7 +124,7 @@ class CompiledPath(object):
                   cp1=(c1x,c1y), cp2=(cx2,cy2), to=(x,y))
         json.dump(op, self.path)
 
-    def quad_curve_to(self, cx, cy, x, y, transform=None):
+    def quad_curve_to(self, cx, cy, x, y):
         self.current_point = (x, y)
         self._expand_extent([(cx,cy), (x,y)])
         self.empty = False
@@ -102,7 +133,7 @@ class CompiledPath(object):
                   cp=(cx,cy), to=(x,y))
         json.dump(op, self.path)
 
-    def line_to(self, x, y, transform=None):
+    def line_to(self, x, y):
         self.current_point = (x, y)
         self._expand_extent([(x,y),])
         self.empty = False
@@ -111,7 +142,7 @@ class CompiledPath(object):
                   to=(x,y))
         json.dump(op, self.path)
 
-    def lines(self, points, transform=None):
+    def lines(self, points):
         self.current_point = tuple(points[-1])
         self._expand_extent(points)
         self.empty = False
@@ -120,7 +151,7 @@ class CompiledPath(object):
                   pnts=points)
         json.dump(op, self.path)
 
-    def add_path(self, other_path, transform=None):
+    def add_path(self, other_path):
         self.empty = False
         ex,ey,ew,eh = other_path.get_bounding_box()
         self._expand_extent([(ex,ey), (ex+ew,ey+eh)])
@@ -132,7 +163,7 @@ class CompiledPath(object):
         json.dump(op, self.path)
 
 
-    def rect(self, x, y, sx, sy, transform=None):
+    def rect(self, x, y, sx, sy):
         self.current_point = (x, y)
         self._expand_extent([(x,y), (x+sx,y+sy)])
         self.empty = False
@@ -141,7 +172,7 @@ class CompiledPath(object):
                   rect=(x,y,sx,sy))
         json.dump(op, self.path)
 
-    def rects(self, rects, transform=None):
+    def rects(self, rects):
         self.empty = False
 
         # Calculate the extent of all the rects
@@ -164,7 +195,7 @@ class CompiledPath(object):
 
     def get_bounding_box(self):
         return self._extent
-    
+
     def _expand_extent(self, points):
         """ Expand the bounds of the extent if any points lay outside it.
         """
