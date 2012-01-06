@@ -70,7 +70,34 @@ def _arc_extent(self, x, y, r, startAngle, endAngle, clockwise):
 class CompiledPath(object):
     def __init__(self, path=None):
         self.uid = rand_uid()
+        self.dirty = True
         self.begin_path()
+
+    ##############################
+    # Serialization related bits
+
+    def _add_op(self, op):
+        json.dump(op, self.path)
+        
+        # Create a new UID if we've been flushed before
+        if not self.dirty:
+            self.uid = rand_uid()
+        
+        self.dirty = True
+        self.empty = False
+
+    def _flush(self):
+        """ Flushes the path to the output file.
+        """
+        if self._needs_flush():
+            # XXX: Implement
+        self.dirty = False
+
+    def _needs_flush(self):
+        return self.dirty
+
+    ##############################
+    # CompiledPath interface
 
     def begin_path(self):
         """ Initialize to a pristine state """
@@ -88,18 +115,17 @@ class CompiledPath(object):
         self._expand_extent([(x,y),])
         
         op = dict(op=KIVA_OPCODES['move_to'], pnt=(x,y))
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def arc(self, x, y, r, startAngle, endAngle, clockwise=False):
         self.current_point = (x+r*cos(endAngle), y+r*sin(endAngle))
         extent = _arc_extent(x, y, r, startAngle, endAngle, clockwise)
         self._expand_extent(extent)
-        self.empty = False
 
         op = dict(op=KIVA_OPCODES['arc'],
                   cntr=(x,y), rad=r, start=startAngle, end=endAngle,
                   clock=clockwise)
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def arc_to(self, x1, y1, x2, y2, r):
         # XXX: this calculation assumes that the radius fits inside the points
@@ -108,73 +134,63 @@ class CompiledPath(object):
         ys = (min(y0,y1,y2), max(y0,y1,y2))
         self._expand_extent([(xs[0],ys[0]), (xs[1],ys[1])])
         self.current_point = (x2, y2)
-        self.empty = False
         
         op = dict(op=KIVA_OPCODES['arc_to'],
                   p1=(x1,y1), p2=(x2,y2), rad=r)
-        json.dump(op, self.path)
-
+        self._add_op(op)
 
     def curve_to(self, cx1, cy1, cx2, cy2, x, y):
         self.current_point = (x, y)
         self._expand_extent([(cx1,cy1), (cx2,cy2), (x,y)])
-        self.empty = False
         
         op = dict(op=KIVA_OPCODES['curve_to'],
                   cp1=(c1x,c1y), cp2=(cx2,cy2), to=(x,y))
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def quad_curve_to(self, cx, cy, x, y):
         self.current_point = (x, y)
         self._expand_extent([(cx,cy), (x,y)])
-        self.empty = False
         
         op = dict(op=KIVA_OPCODES['quad_curve_to'],
                   cp=(cx,cy), to=(x,y))
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def line_to(self, x, y):
         self.current_point = (x, y)
         self._expand_extent([(x,y),])
-        self.empty = False
         
         op = dict(op=KIVA_OPCODES['line_to'],
                   to=(x,y))
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def lines(self, points):
         self.current_point = tuple(points[-1])
         self._expand_extent(points)
-        self.empty = False
         
         op = dict(op=KIVA_OPCODES['lines'],
                   pnts=points)
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def add_path(self, other_path):
-        self.empty = False
         ex,ey,ew,eh = other_path.get_bounding_box()
         self._expand_extent([(ex,ey), (ex+ew,ey+eh)])
         
-        # XXX: Flush other_path to the output?
+        if not other_path._needs_flush():
+            other_path._flush()
         
         op = dict(op=KIVA_OPCODES['add_path'],
                   pth=other_path.uid)
-        json.dump(op, self.path)
-
+        self._add_op(op)
 
     def rect(self, x, y, sx, sy):
         self.current_point = (x, y)
         self._expand_extent([(x,y), (x+sx,y+sy)])
-        self.empty = False
         
         op = dict(op=KIVA_OPCODES['rect'],
                   rect=(x,y,sx,sy))
-        json.dump(op, self.path)
+        self._add_op(op)
 
     def rects(self, rects):
-        self.empty = False
-
         # Calculate the extent of all the rects
         xs, ys, ws, hs = zip(*rects)
         ll = zip(xs, ys)
@@ -184,8 +200,7 @@ class CompiledPath(object):
 
         op = dict(op=KIVA_OPCODES['rects'],
                   rects=rects)
-        json.dump(op, self.path)
-
+        self._add_op(op)
 
     def is_empty(self):
         return self.empty
