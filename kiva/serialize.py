@@ -184,6 +184,7 @@ class CompiledPath(object):
 
     def arc_to(self, x1, y1, x2, y2, r):
         # XXX: this calculation assumes that the radius fits inside the points
+        # XXX: Additionally, the arc will rarely intersect p1.
         x0, y0 = self.current_point
         xs = (min(x0,x1,x2), max(x0,x1,x2))
         ys = (min(y0,y1,y2), max(y0,y1,y2))
@@ -285,8 +286,14 @@ class GraphicsContext(object):
     def __init__(self, size, *args, **kwargs):
         print "GraphicsContext.__init__()"
         self._width, self._height = size
+        self.transform = (1.0,0.0,0.0,1.0,0.0,0.0)
         self.text_pos = (0.0, 0.0)
         self.text_transform = (1.0,0.0,0.0,1.0,0.0,0.0)
+        self.uid = rand_uid()
+        self.backing_store = StringIO()
+
+    def _add_op(self, op):
+        json.dump(op, self.backing_store)
 
     #----------------------------------------------------------------
     # Size info
@@ -295,13 +302,11 @@ class GraphicsContext(object):
     def height(self):
         """ Returns the height of the context.
         """
-        print "GraphicsContext.height()"
         return self._height
 
     def width(self):
         """ Returns the width of the context.
         """
-        print "GraphicsContext.width()"
         return self._width
 
     #----------------------------------------------------------------
@@ -314,7 +319,10 @@ class GraphicsContext(object):
             sx:float -- The new scale factor for the x axis
             sy:float -- The new scale factor for the y axis
         """
-        print "GraphicsContext.scale_ctm()"
+        self.transform
+        
+        op = dict(op=KIVA_OPCODES['scale_ctm'], scale=(sx,sy))
+        self._add_op(op)
 
     def translate_ctm(self, tx, ty):
         """ Translate the coordinate system by the given value by (tx,ty)
@@ -322,7 +330,10 @@ class GraphicsContext(object):
             tx:float --  The distance to move in the x direction
             ty:float --   The distance to move in the y direction
         """
-        print "GraphicsContext.translate_ctm()"
+        self.transform
+        
+        op = dict(op=KIVA_OPCODES['translate_ctm'], offset=(tx,ty))
+        self._add_op(op)
 
     def rotate_ctm(self, angle):
         """ Rotates the coordinate space for drawing by the given angle.
@@ -330,7 +341,10 @@ class GraphicsContext(object):
             angle:float -- the angle, in radians, to rotate the coordinate
                            system
         """
-        print "GraphicsContext.rotate_ctm()"
+        self.transform
+        
+        op = dict(op=KIVA_OPCODES['rotate_ctm'], angle=angle)
+        self._add_op(op)
 
     def concat_ctm(self, transform):
         """ Concatenate the transform to current coordinate transform matrix.
@@ -338,13 +352,15 @@ class GraphicsContext(object):
             transform:affine_matrix -- the transform matrix to concatenate with
                                        the current coordinate matrix.
         """
-        print "GraphicsContext.concat_ctm()"
+        self.transform
+        
+        op = dict(op=KIVA_OPCODES['concat_ctm'], transform=transform)
+        self._add_op(op)
 
     def get_ctm(self):
         """ Return the current coordinate transform matrix.
         """
-        print "GraphicsContext.get_ctm()"
-        return (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+        return self.transform
 
     #----------------------------------------------------------------
     # Save/Restore graphics state.
@@ -355,12 +371,16 @@ class GraphicsContext(object):
 
             This should always be paired with a restore_state
         """
-        print "GraphicsContext.save_state()"
+        # XXX: actually push the current state onto a stack
+        op = dict(op=KIVA_OPCODES['save_state'])
+        self._add_op(op)
 
     def restore_state(self):
         """ Restore the previous graphics state.
         """
-        print "GraphicsContext.restore_state()"
+        # XXX: actually pop the current state off the stack
+        op = dict(op=KIVA_OPCODES['restore_state'])
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # context manager interface
@@ -379,14 +399,16 @@ class GraphicsContext(object):
     def set_antialias(self,value):
         """ Set/Unset antialiasing
         """
-        print "GraphicsContext.set_antialias()"
+        op = dict(op=KIVA_OPCODES['set_antialias'], value=value)
+        self._add_op(op)
 
     def set_line_width(self,width):
         """ Set the line width for drawing
 
             width:float -- The new width for lines in user space units.
         """
-        print "GraphicsContext.set_line_width()"
+        op = dict(op=KIVA_OPCODES['set_line_width'], width=width)
+        self._add_op(op)
 
     def set_line_join(self,style):
         """ Set style for joining lines in a drawing.
@@ -394,7 +416,8 @@ class GraphicsContext(object):
             style:join_style -- The line joining style.  The available
                                 styles are JOIN_ROUND, JOIN_BEVEL, JOIN_MITER.
         """
-        print "GraphicsContext.set_line_join()"
+        op = dict(op=KIVA_OPCODES['set_line_join'], style=style)
+        self._add_op(op)
 
     def set_miter_limit(self,limit):
         """ Specifies limits on line lengths for mitering line joins.
@@ -407,7 +430,8 @@ class GraphicsContext(object):
 
             limit:float -- limit for mitering joins.
         """
-        print "GraphicsContext.set_miter_limit()"
+        op = dict(op=KIVA_OPCODES['set_miter_limit'], limit=limit)
+        self._add_op(op)
 
     def set_line_cap(self,style):
         """ Specify the style of endings to put on line ends.
@@ -415,7 +439,8 @@ class GraphicsContext(object):
             style:cap_style -- the line cap style to use. Available styles
                                are CAP_ROUND,CAP_BUTT,CAP_SQUARE
         """
-        print "GraphicsContext.set_line_cap()"
+        op = dict(op=KIVA_OPCODES['set_line_cap'], style=style)
+        self._add_op(op)
 
     def set_line_dash(self,lengths,phase=0):
         """
@@ -426,7 +451,9 @@ class GraphicsContext(object):
             phase:float -- Specifies how many units into dash pattern
                            to start.  phase defaults to 0.
         """
-        print "GraphicsContext.set_line_dash()"
+        op = dict(op=KIVA_OPCODES['set_line_dash'],
+                  lengths=lengths, phase=phase)
+        self._add_op(op)
 
     def set_flatness(self,flatness):
         """ Not implemented
@@ -434,8 +461,8 @@ class GraphicsContext(object):
             It is device dependent and therefore not recommended by
             the PDF documentation.
         """
-        print "GraphicsContext.set_flatness()"
-        raise NotImplementedError
+        op = dict(op=KIVA_OPCODES['set_flatness'], flatness=flatness)
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Sending drawing data to a device
@@ -444,12 +471,14 @@ class GraphicsContext(object):
     def flush(self):
         """ Send all drawing data to the destination device.
         """
-        print "GraphicsContext.flush()"
+        op = dict(op=KIVA_OPCODES['flush'])
+        self._add_op(op)
 
     def synchronize(self):
         """ Prepares drawing data to be updated on a destination device.
         """
-        print "GraphicsContext.synchronize()"
+        op = dict(op=KIVA_OPCODES['synchronize'])
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Page Definitions
@@ -458,12 +487,14 @@ class GraphicsContext(object):
     def begin_page(self):
         """ Create a new page within the graphics context.
         """
-        print "GraphicsContext.begin_page()"
+        op = dict(op=KIVA_OPCODES['begin_page'])
+        self._add_op(op)
 
     def end_page(self):
         """ End drawing in the current page of the graphics context.
         """
-        print "GraphicsContext.end_page()"
+        op = dict(op=KIVA_OPCODES['end_page'])
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Building paths
@@ -472,13 +503,11 @@ class GraphicsContext(object):
     def begin_path(self):
         """ Clear the current drawing path and begin a new one.
         """
-        print "GraphicsContext.begin_path()"
         self.path = CompiledPath()
 
     def move_to(self,x,y):
         """ Start a new drawing subpath at place the current point at (x,y).
         """
-        print "GraphicsContext.move_to()"
         self.path.move_to(x,y)
 
     def line_to(self,x,y):
@@ -486,7 +515,6 @@ class GraphicsContext(object):
 
             The current point is moved to (x,y).
         """
-        print "GraphicsContext.line_to()"
         self.path.line_to(x,y)
 
     def lines(self,points):
@@ -496,13 +524,11 @@ class GraphicsContext(object):
 
             Points is an Nx2 array of x,y pairs.
         """
-        print "GraphicsContext.lines()"
         self.path.lines(points)
 
     def line_set(self, starts, ends):
         """ Draw multiple disjoint line segments.
         """
-        print "GraphicsContext.line_set()"
         for start, end in izip(starts, ends):
             self.path.path.moveTo(start[0], start[1])
             self.path.path.lineTo(end[0], end[1])
@@ -510,54 +536,47 @@ class GraphicsContext(object):
     def rect(self,x,y,sx,sy):
         """ Add a rectangle as a new subpath.
         """
-        print "GraphicsContext.rect()"
         self.path.rect(x,y,sx,sy)
 
     def rects(self,rects):
         """ Add multiple rectangles as separate subpaths to the path.
         """
-        print "GraphicsContext.rects()"
         self.path.rects(rects)
 
     def draw_rect(self, rect, mode=constants.FILL_STROKE):
         """ Draw a rect.
         """
-        print "GraphicsContext.draw_rect()"
+        op = dict(op=KIVA_OPCODES['draw_rect'], rect=rect, mode=mode)
+        self._add_op(op)
 
     def add_path(self, path):
         """ Add a subpath to the current path.
         """
-        print "GraphicsContext.add_path()"
         self.path.add_path(path)
 
     def close_path(self):
         """ Close the path of the current subpath.
         """
-        print "GraphicsContext.close_path()"
         self.path.close_path()
 
     def curve_to(self, cp1x, cp1y, cp2x, cp2y, x, y):
         """
         """
-        print "GraphicsContext.curve_to()"
         self.path.curve_to(cp1x, cp1y, cp2x, cp2y, x, y)
 
     def quad_curve_to(self, cpx, cpy, x, y):
         """
         """
-        print "GraphicsContext.quad_curve_to()"
         self.path.quad_curve_to(cpx, cpy, x, y)
 
     def arc(self, x, y, radius, start_angle, end_angle, clockwise=False):
         """
         """
-        print "GraphicsContext.arc()"
         self.path.arc(x, y, radius, start_angle, end_angle, clockwise)
 
     def arc_to(self, x1, y1, x2, y2, radius):
         """
         """
-        print "GraphicsContext.arc_to()"
         self.path.arc_to(x1, y1, x2, y2, radius)
 
     #----------------------------------------------------------------
@@ -567,19 +586,16 @@ class GraphicsContext(object):
     def is_path_empty(self):
         """ Test to see if the current drawing path is empty
         """
-        print "GraphicsContext.is_path_empty()"
         return self.path.is_empty()
 
     def get_path_current_point(self):
         """ Return the current point from the graphics context.
         """
-        print "GraphicsContext.get_path_current_point()"
         return self.path.get_current_point()
 
     def get_path_bounding_box(self):
         """ Return the bounding box for the current path object.
         """
-        print "GraphicsContext.get_path_bounding_box()"
         return self.path.get_bounding_box()
 
     #----------------------------------------------------------------
@@ -589,24 +605,28 @@ class GraphicsContext(object):
     def clip(self):
         """
         """
-        print "GraphicsContext.clip()"
+        op = dict(op=KIVA_OPCODES['clip'])
+        self._add_op(op)
 
     def even_odd_clip(self):
         """
         """
-        print "GraphicsContext.even_odd_clip()"
+        op = dict(op=KIVA_OPCODES['even_odd_clip'])
+        self._add_op(op)
 
     def clip_to_rect(self, x, y, w, h):
         """ Clip context to the given rectangular region.
 
             Region should be a 4-tuple or a sequence.
         """
-        print "GraphicsContext.clip_to_rect()"
+        op = dict(op=KIVA_OPCODES['clip_to_rect'], rect=(x,y,w,h))
+        self._add_op(op)
 
     def clip_to_rects(self, rects):
         """
         """
-        print "GraphicsContext.clip_to_rects()"
+        op = dict(op=KIVA_OPCODES['clip_to_rects'], rects=rects)
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Color space manipulation
@@ -619,20 +639,17 @@ class GraphicsContext(object):
     def set_fill_color_space(self):
         """
         """
-        msg = "set_fill_color_space not implemented yet."
-        raise NotImplementedError, msg
+        raise NotImplementedError
 
     def set_stroke_color_space(self):
         """
         """
-        msg = "set_stroke_color_space not implemented yet."
-        raise NotImplementedError, msg
+        raise NotImplementedError
 
     def set_rendering_intent(self):
         """
         """
-        msg = "set_rendering_intent not implemented yet."
-        raise NotImplementedError, msg
+        raise NotImplementedError
 
     #----------------------------------------------------------------
     # Color manipulation
@@ -641,17 +658,20 @@ class GraphicsContext(object):
     def set_fill_color(self, color):
         """
         """
-        print "GraphicsContext.set_fill_color()"
+        op = dict(op=KIVA_OPCODES['set_fill_color'], color=color)
+        self._add_op(op)
 
     def set_stroke_color(self, color):
         """
         """
-        print "GraphicsContext.set_stroke_color()"
+        op = dict(op=KIVA_OPCODES['set_stroke_color'], color=color)
+        self._add_op(op)
 
     def set_alpha(self, alpha):
         """
         """
-        print "GraphicsContext.set_alpha()"
+        op = dict(op=KIVA_OPCODES['set_alpha'], alpha=alpha)
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Gradients
@@ -661,13 +681,19 @@ class GraphicsContext(object):
                         units='userSpaceOnUse'):
         """ Sets a linear gradient as the current brush.
         """
-        print "GraphicsContext.linear_gradient()"
+        op = dict(op=KIVA_OPCODES['linear_gradient'],
+                  start=(x1,y1), end=(x2,y2), stops=stops,
+                  spread=spread_method, units=units)
+        self._add_op(op)
 
     def radial_gradient(self, cx, cy, r, fx, fy, stops, spread_method,
                         units='userSpaceOnUse'):
         """ Sets a radial gradient as the current brush.
         """
-        print "GraphicsContext.radial_gradient()"
+        op = dict(op=KIVA_OPCODES['radial_gradient'],
+                  center=(cx,cy), focus=(fx,fy), radius=r,
+                  stops=stops, spread=spread_method, units=units)
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Drawing Images
@@ -679,7 +705,11 @@ class GraphicsContext(object):
 
         rect - a tuple (x,y,w,h)
         """
-        print "GraphicsContext.draw_image()"
+        # XXX: Make sure the client has the image before drawing it
+        op = dict(op=KIVA_OPCODES['draw_image'], img=img)
+        if rect:
+            op['rect'] = rect
+        self._add_op(op)
 
     #----------------------------------------------------------------
     # Drawing Text
@@ -688,50 +718,59 @@ class GraphicsContext(object):
     def select_font(self, name, size, textEncoding):
         """ Set the font for the current graphics context.
         """
-        print "GraphicsContext.select_font()"
+        op = dict(op=KIVA_OPCODES['select_font'], face=name, size=size,
+                  textEncoding=textEncoding)
+        self._add_op(op)
 
     def set_font(self, font):
         """ Set the font for the current graphics context.
         """
-        print "GraphicsContext.set_font()"
+        # XXX: Handle passing font objects to the client
+        op = dict(op=KIVA_OPCODES['set_font'], font=font)
+        self._add_op(op)
 
     def set_font_size(self, size):
         """
         """
-        print "GraphicsContext.set_font_size()"
+        op = dict(op=KIVA_OPCODES['set_font_size'], size=size)
+        self._add_op(op)
 
     def set_character_spacing(self, spacing):
         """
         """
-        print "GraphicsContext.set_character_spacing()"
+        op = dict(op=KIVA_OPCODES['set_character_spacing'], spacing=spacing)
+        self._add_op(op)
 
     def set_text_drawing_mode(self):
         """
         """
-        print "GraphicsContext.set_text_drawing_mode()"
+        op = dict(op=KIVA_OPCODES['set_text_drawing_mode'])
+        self._add_op(op)
 
     def set_text_position(self,x,y):
         """
         """
-        print "GraphicsContext.set_text_position()"
         self.text_pos = (x,y)
+
+        op = dict(op=KIVA_OPCODES['set_text_position'], pos=(x,y))
+        self._add_op(op)
 
     def get_text_position(self):
         """
         """
-        print "GraphicsContext.get_text_position()"
         return self.text_pos
 
     def set_text_matrix(self,ttm):
         """
         """
-        print "GraphicsContext.set_text_matrix()"
         self.text_transform = ttm
+
+        op = dict(op=KIVA_OPCODES['set_text_matrix'], matrix=ttm)
+        self._add_op(op)
 
     def get_text_matrix(self):
         """
         """
-        print "GraphicsContext.get_text_matrix()"
         return self.text_transform
 
     def show_text(self, text, point=None):
@@ -740,67 +779,81 @@ class GraphicsContext(object):
             This is also used for showing text at a particular point
             specified by x and y.
         """
-        print "GraphicsContext.show_text()"
+        op = dict(op=KIVA_OPCODES['show_text'], text=text)
+        if point:
+            op['pos'] = point
+        self._add_op(op)
 
     def show_text_at_point(self, text, x, y):
         """ Draw text at some point (x,y).
         """
-        print "GraphicsContext.show_text_at_point()"
+        op = dict(op=KIVA_OPCODES['show_text_at_point'], text=text, pos=(x,y))
+        self._add_op(op)
 
     def show_glyphs(self):
         """
         """
-        raise NotImplementedError
+        op = dict(op=KIVA_OPCODES['show_glyphs'])
+        self._add_op(op)
 
     def get_text_extent(self, text):
         """ Returns the bounding rect of the rendered text
         """
-        print "GraphicsContext.get_text_extent()"
         return 0.0, 0.0, 1.0, 1.0
 
     def get_full_text_extent(self, text):
         """ Backwards compatibility API over .get_text_extent() for Enable
         """
-        print "GraphicsContext.get_full_text_extent()"
         x1, y1, x2, y2 = self.get_text_extent(text)
         return x2, y2, y1, x1
 
     #----------------------------------------------------------------
     # Painting paths (drawing and filling contours)
     #----------------------------------------------------------------
+    # XXX: Make sure the path is on the client first!
 
     def stroke_path(self):
         """
         """
-        print "GraphicsContext.stroke_path()"
+        op = dict(op=KIVA_OPCODES['stroke_path'])
+        self._add_op(op)
+
         self.begin_path()
 
     def fill_path(self):
         """
         """
-        print "GraphicsContext.fill_path()"
+        op = dict(op=KIVA_OPCODES['fill_path'])
+        self._add_op(op)
+
         self.begin_path()
 
     def eof_fill_path(self):
         """
         """
-        print "GraphicsContext.eof_fill_path()"
         self.begin_path()
+
+        op = dict(op=KIVA_OPCODES['eof_fill_path'])
+        self._add_op(op)
 
     def stroke_rect(self,rect):
         """
         """
-        print "GraphicsContext.stroke_rect()"
+        op = dict(op=KIVA_OPCODES['stroke_rect'], rect=rect)
+        self._add_op(op)
 
     def stroke_rect_with_width(self,rect,width):
         """
         """
-        print "GraphicsContext.stroke_rect_with_width()"
+        op = dict(op=KIVA_OPCODES['stroke_rect_with_width'], rect=rect,
+                  width=width)
+        self._add_op(op)
 
     def fill_rect(self,rect):
         """
         """
-        print "GraphicsContext.fill_rect()"
+        op = dict(op=KIVA_OPCODES['fill_rect'], rect=rect)
+        self._add_op(op)
 
     def fill_rects(self):
         """
@@ -810,34 +863,39 @@ class GraphicsContext(object):
     def clear_rect(self, rect):
         """
         """
-        print "GraphicsContext.clear_rect()"
+        op = dict(op=KIVA_OPCODES['clear_rect'], rect=rect)
+        self._add_op(op)
 
     def clear(self, clear_color=(1.0,1.0,1.0,1.0)):
         """
         """
-        print "GraphicsContext.clear()"
+        op = dict(op=KIVA_OPCODES['clear'], color=clear_color)
+        self._add_op(op)
 
     def draw_path(self, mode):
         """ Walk through all the drawing subpaths and draw each element.
 
             Each subpath is drawn separately.
         """
-        print "GraphicsContext.draw_path()"
         self.begin_path()
+
+        op = dict(op=KIVA_OPCODES['draw_path'], mode=mode)
+        self._add_op(op)
 
     def get_empty_path(self):
         """ Return a path object that can be built up and then reused.
         """
-        print "GraphicsContext.get_empty_path()"
         return CompiledPath()
 
     def draw_path_at_points(self, points, path, mode):
-        print "GraphicsContext.draw_path_at_points()"
+        op = dict(op=KIVA_OPCODES['draw_path_at_points'], path=path, mode=mode,
+                  points=points)
+        self._add_op(op)
 
     def save(self, filename, file_format=None):
         """ Save the contents of the context to a file
         """
-        print "GraphicsContext.save()"
+        pass
 
 def font_metrics_provider():
     return GraphicsContext()
